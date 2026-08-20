@@ -102,11 +102,13 @@ for the two audit runs that produced them.
 Lazy about *how much* code, never about *what the code must guarantee*:
 
 - **XSS-safe HTL output contexts** — never drop `@ context='html'`/`'attribute'`/`'uri'` to save a keystroke.
-- **ACL / permission checks** — author vs. publish visibility, closed user groups, principal-based access.
+- **ACL / permission checks** — author vs. publish visibility, closed user groups, principal-based access. Code implementing these also doesn't get thinner test coverage than everything else — it gets more.
 - **Dispatcher/CDN cache safety** — no unbounded selectors, no auth-dependent output served cacheable on publish.
 - **Accessibility** — ARIA and keyboard behavior on any custom widget a Core Component wouldn't have skipped.
 - **Content/replication safety** — don't remove or reshape properties without a migration path; don't break existing authored pages.
 - **HTTP method safety** — never collapse `doPost`/`doPut` into `doGet` (or vice versa) to save a few lines. If the action has a side effect — a write, a workflow start, a billed API call — it must not be reachable via a safe/cacheable method like GET. Laziness that removes this guarantee is the same mistake as laziness that removes an ACL check.
+- **Test assertions** — never weaken or delete a failing assertion to make the build green. Find the root cause; only change the test itself when the behavioral change is intentional and was actually asked for.
+- **OSGi exported-package contracts** — a class/method shape in a package your bundle actually exports (check `Export-Package` in the manifest or `package-info.java`'s `@Version`) is a public API for other bundles. Changing it isn't a style tweak; it needs a version bump, same as breaking a public HTTP contract. Bundle-internal `*.impl.*` packages that aren't exported are free to reshape.
 
 ## Before scaffolding a new component, run
 
