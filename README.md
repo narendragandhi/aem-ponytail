@@ -103,6 +103,34 @@ handler.
   (HTTP method safety) the ladder didn't originally anticipate and that was
   added as a direct result of the audit.
 
+## Relationship to Adobe's official skills
+
+Adobe publishes its own agent skills at
+[adobe/skills](https://github.com/adobe/skills)
+(`plugins/aem/cloud-service/skills/`), including `create-component` and
+`code-assessment`. This isn't a competitor to either — it covers a gap
+between them.
+
+- **`create-component`** scaffolds AEM components and already checks
+  whether a Core Component can be extended (a Tier 1/2/3 project → Core
+  Component → ask-user decision table), which overlaps with ladder rung 3.
+  But its own documented workflow always creates a Sling Model, a unit
+  test, and a dedicated clientlib — Step 3 literally says "Component
+  Clientlib — Create for Every Component" — with no earlier gate for
+  "does this need a new component at all" or "is a one-line HTL expression
+  enough." Ponytail's rungs 1, 2, and 6 are exactly the check that's
+  missing before `create-component`'s workflow starts.
+- **`code-assessment`** audits AEM code, but for a different problem
+  entirely: deprecated APIs, unbounded queries, missing HTTP timeouts,
+  `@Inject` modernization, scheduler/replication/event-listener migration.
+  None of its pattern rows are about custom code written for something
+  Core Components/Sling/an installed dependency already provides — that's
+  `aem-ponytail-review`'s whole job.
+
+Practical read: run `aem-ponytail` as the gate before `create-component`
+scaffolds anything, and treat `aem-ponytail-review` as covering the
+over-engineering pattern `code-assessment` doesn't check for.
+
 ## Install
 
 **Claude Code** (verified — this is the only integration actually tested so
