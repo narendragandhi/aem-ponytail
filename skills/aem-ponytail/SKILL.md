@@ -91,6 +91,7 @@ about the solution, never about reading the repo.
 | Write a servlet that returns fixed/static JSON | Does the response ever actually vary by request? | Serve a static `sling:File`/`nt:file` resource instead — Sling's default GET servlet already does this |
 | Write a servlet action that re-derives fields (status, counts, flags) an existing Sling Model already computes from the same service | Does a `@Model` in this repo already expose this shape via getters? | Add `@Exporter(name="jackson", extensions="json")` to the model and drop the servlet action |
 | Hand-roll a `/health` or `/status` endpoint | Is Apache Felix Health Check (bundled with AEM) already running? | Register a tagged `HealthCheck` service, query `/system/health.json?tags=...` |
+| Reshape a public class/method to save a rewrite | Is its package in `Export-Package` (manifest, or `package-info.java`'s `@Version`)? Most project `*.impl.*` bundles export nothing. | If exported, it's a contract other bundles rely on — version-bump, don't casually reshape. If not exported, reshape freely. |
 
 Every row above was found by actually running
 [aem-ponytail-review](../aem-ponytail-review/SKILL.md) against real AEM code,
@@ -107,8 +108,6 @@ Lazy about *how much* code, never about *what the code must guarantee*:
 - **Accessibility** — ARIA and keyboard behavior on any custom widget a Core Component wouldn't have skipped.
 - **Content/replication safety** — don't remove or reshape properties without a migration path; don't break existing authored pages.
 - **HTTP method safety** — never collapse `doPost`/`doPut` into `doGet` (or vice versa) to save a few lines. If the action has a side effect — a write, a workflow start, a billed API call — it must not be reachable via a safe/cacheable method like GET. Laziness that removes this guarantee is the same mistake as laziness that removes an ACL check.
-- **Test assertions** — never weaken or delete a failing assertion to make the build green. Find the root cause; only change the test itself when the behavioral change is intentional and was actually asked for.
-- **OSGi exported-package contracts** — a class/method shape in a package your bundle actually exports (check `Export-Package` in the manifest or `package-info.java`'s `@Version`) is a public API for other bundles. Changing it isn't a style tweak; it needs a version bump, same as breaking a public HTTP contract. Bundle-internal `*.impl.*` packages that aren't exported are free to reshape.
 
 ## Before scaffolding a new component, run
 
